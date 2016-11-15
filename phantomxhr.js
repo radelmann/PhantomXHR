@@ -79,6 +79,7 @@ function setup(options){
 				requests: {},
 				call: {},
 				fake: function (match) {
+					match.delay = match.delay || 1;
 
 					function s4() {
 						return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -183,7 +184,6 @@ function setup(options){
 		}
 
 		function respond(request, response) {
-
 			if(!window._ajaxmock_){
 				console.log('[PhantomXHR] could not respond, window._ajaxmock_ does not exist.');
 				return;
@@ -203,12 +203,16 @@ function setup(options){
 					return;
 				}
 
-				request.respond(
-					status || response.status || 200, response.headers || {
-						"Content-Type": "application/json"
-					},
-					body || response.responseBody || ''
-				);
+				setTimeout(function() {
+					console.log('waiting ' + response.delay + ' milliseconds before responding.');
+					
+					request.respond(
+						status || response.status || 200, response.headers || {
+							"Content-Type": "application/json"
+						},
+						body || response.responseBody || ''
+					);	
+				}, response.delay);
 
 				window._ajaxmock_.requests_completed++;
 			}
@@ -252,7 +256,7 @@ function fake(options) {
 		options.responseBody = JSON.stringify(options.responseBody);
 	}
 
-	var guid = page.evaluate(function (url, method, responseBody, status, headers, holdResponse) {
+	var guid = page.evaluate(function (url, method, responseBody, status, headers, holdResponse, delay) {
 		if (window._ajaxmock_ && url) {
 
 			if (responseBody && headers && headers["Content-Type"] && headers["Content-Type"] === "application/json") {
@@ -271,10 +275,11 @@ function fake(options) {
 				responseBody: responseBody,
 				status: status,
 				headers: headers,
-				holdResponse: holdResponse
+				holdResponse: holdResponse,
+				delay: delay
 			});
 		}
-	}, url, options.method, options.responseBody, options.status, options.headers, !!options.holdResponse);
+	}, url, options.method, options.responseBody, options.status, options.headers, !!options.holdResponse, options.delay);
 
 	if (guid === 'JSON') {
 		console.log('[PhantomXHR] JSON was invalid : ' + options.method + ' : ' + url);
