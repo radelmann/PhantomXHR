@@ -4,7 +4,9 @@ var sinonSrc = {
 	libraryRoot: './'
 };
 
-casper.test.begin('Initial load success', 1, function(test) {
+casper.options.timeout = 30000;
+
+casper.test.begin('Initial load success with 3 second latency', 1, function(test) {
 	var fake;
 	var initSuccessMessage = 'My random success message';
 
@@ -17,17 +19,15 @@ casper.test.begin('Initial load success', 1, function(test) {
 				method: 'GET',
 				responseBody: {
 					successMessage: initSuccessMessage
-				}
+				},
+				delay: 3000
 			});
 		}).
 		start('./demo/simpleapp.html').
 		then(function(){
-			casper.waitFor(
-				function(){
-					return fake.count() === 1;
-				}, function (){
-					test.assertSelectorHasText('#msg', initSuccessMessage);
-				});
+			casper.waitUntilVisible('#msg', function (){
+				test.assertSelectorHasText('#msg', initSuccessMessage);
+			});
 		}).
 		run(done);
 });

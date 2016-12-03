@@ -9,7 +9,7 @@
 	<input id="input" type="text" value="" />
 	<a href="#" id="button">POST data</a>
 
-	<span id="msg"></span>
+	<span id="msg" style="display:none;">no value set yet.</span>
 
 </body>
 
@@ -32,6 +32,7 @@
 				mess = "Generic failure message";
 			}
 		}
+		document.getElementById('msg').setAttribute("style", "display: block;");
 		document.getElementById('msg').innerHTML = mess;
 	}, false);
 
@@ -50,6 +51,7 @@
 				} else {
 					mess = "Generic POST failure message";
 				}
+				document.getElementById('msg').setAttribute("style", "display: block;");
 				document.getElementById('msg').innerHTML = mess;
 			}
 		}, false);
